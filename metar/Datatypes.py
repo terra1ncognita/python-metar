@@ -38,7 +38,7 @@ class temperature(object):
     def __str__(self):
         return self.string()
 
-    def value( self, units=None ):
+    def value( self, units='C' ):
         """Return the temperature in the specified units."""
         if units is None:
             return self._value
@@ -59,7 +59,7 @@ class temperature(object):
         elif units == "F":
             return 32.0+celsius_value*1.8
 
-    def string( self, units=None ):
+    def string( self, units='C' ):
         """Return a string representation of the temperature, using the given units."""
         if units is None:
             units = self._units
@@ -88,7 +88,7 @@ class pressure(object):
     def __str__(self):
         return self.string()
 
-    def value( self, units=None ):
+    def value( self, units='HPA' ):
         """Return the pressure in the specified units."""
         if units is None:
             return self._value
@@ -109,7 +109,7 @@ class pressure(object):
         else:
             raise UnitsError("unrecognized pressure unit: '"+units+"'")
 
-    def string( self, units=None ):
+    def string( self, units='HPA' ):
         """Return a string representation of the pressure, using the given units."""
         if not units:
             units = self._units
@@ -145,7 +145,7 @@ class speed(object):
     def __str__(self):
         return self.string()
 
-    def value( self, units=None ):
+    def value( self, units='MPS' ):
         """Return the speed in the specified units."""
         if not units:
             return self._value
@@ -172,7 +172,7 @@ class speed(object):
         elif units == "MPS":
             return mps_value
 
-    def string( self, units=None ):
+    def string( self, units='MPS' ):
         """Return a string representation of the speed in the given units."""
         if not units:
             units = self._units
@@ -239,7 +239,7 @@ class distance(object):
     def __str__(self):
         return self.string()
 
-    def value( self, units=None ):
+    def value( self, units='M' ):
         """Return the distance in the specified units."""
         if not units:
             return self._value
@@ -270,7 +270,7 @@ class distance(object):
         elif units == "M":
             return m_value
 
-    def string( self, units=None ):
+    def string( self, units='M' ):
         """Return a string representation of the distance in the given units."""
         if not units:
             units = self._units
@@ -382,7 +382,7 @@ class precipitation(object):
     def __str__(self):
         return self.string()
 
-    def value( self, units=None ):
+    def value( self, units='CM' ):
         """Return the precipitation in the specified units."""
         if not units:
             return self._value
@@ -401,7 +401,7 @@ class precipitation(object):
         else:
             return i_value
 
-    def string( self, units=None ):
+    def string( self, units='CM' ):
         """Return a string representation of the precipitation in the given units."""
         if not units:
             units = self._units
