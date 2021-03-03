@@ -1,5 +1,5 @@
 [![PyPI version](https://badge.fury.io/py/metar.svg)](https://badge.fury.io/py/metar)
-[![Build Status](https://travis-ci.org/python-metar/python-metar.png?branch=master)](https://travis-ci.org/python-metar/python-metar)
+[![Build Status](https://github.com/python-metar/python-metar/workflows/CI/badge.svg)](https://github.com/python-metar/python-metar/actions)
 [![Coverage Status](https://img.shields.io/coveralls/python-metar/python-metar.svg)](https://coveralls.io/r/python-metar/python-metar?branch=master)
 [![Codecov Status](https://codecov.io/gh/python-metar/python-metar/branch/master/graph/badge.svg)](https://codecov.io/gh/python-metar/python-metar)
 
@@ -49,12 +49,12 @@ where `cycle` is a 2-digit cycle number (`00` thru `23`).
 METAR specifications
 --------------------
 
-The [Federal Meteorological Handbook No.1. (FMH-1 1995)](http://www.ofcm.gov/publications/fmh/FMH1/FMH1.pdf) describes the U.S. standards for METAR. The [World Meteorological Organization (WMO) Manual on Codes](http://www.wmo.int/pages/prog/www/WMOCodes.html), vol I.1, Part A (WMO-306 I.i.A) is another good reference.
+The [Federal Meteorological Handbook No.1. (FMC-H1-2017)](http://www.ofcm.gov/publications/fmh/FMH1/FMH1.pdf) describes the U.S. standards for METAR. The [World Meteorological Organization (WMO) Manual on Codes](http://www.wmo.int/pages/prog/www/WMOCodes.html), vol I.1, Part A (WMO-306 I.i.A) is another good reference.
 
 Author
 ------
 
-The `python-metar` library was orignally authored by [Tom Pollard](https://github.com/tomp) in January 2005, and is now maintained by contributers on Github.
+The `python-metar` library was orignally authored by [Tom Pollard](https://github.com/tomp) in January 2005, and is now maintained by contributors on Github.
 
 Installation
 ------------------------------------------------------------------------

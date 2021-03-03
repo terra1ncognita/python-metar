@@ -39,6 +39,20 @@ def test_module():
     assert hasattr(metar, "__version__")
 
 
+def test_issue114_multiplebecominggroups():
+    """multiple BECMG (becoming) groups should be possible"""
+    code = (
+        "METAR WSSS 280900Z 26009KT 180V350 0600 R20R/1900D R20C/1600D +TSRA FEW008 SCT013CB FEW015TCU 24/23 Q1010 "
+        "BECMG FM0920 TL0930 3000 TSRA "
+        "BECMG FM1000 TL1020 6000 NSW"
+    )
+
+    metar = Metar.Metar(code)
+    assert metar.decode_completed
+    assert len(metar._trend_groups) == 10
+    assert metar.trend() == "BECMG FM0920 TL0930 3000 TSRA BECMG FM1000 TL1020 6000 NSW"
+
+
 @pytest.mark.parametrize("trailstr", ["", "=", "=  "])
 def test_issue84_trimequals(trailstr):
     """A trailing = in METAR should not trip up the ingest."""
@@ -53,11 +67,14 @@ def test_issue84_trimequals(trailstr):
 def test_issue77_ice_accretion(hours):
     """Metar parser supports ice accretion data."""
     report = Metar.Metar(
-        ("KABI 031752Z 30010KT 6SM BR FEW009 OVC036 02/01 A3003 RMK AO2 "
-         "SLP176 60001 I%i003 T00170006 10017 21006 56017") % (hours, )
+        (
+            "KABI 031752Z 30010KT 6SM BR FEW009 OVC036 02/01 A3003 RMK AO2 "
+            "SLP176 60001 I%i003 T00170006 10017 21006 56017"
+        )
+        % (hours,)
     )
-    myattr = "ice_accretion_%ihr" % (hours, )
-    assert abs(getattr(report, myattr).value('IN') - 0.03) < 0.001
+    myattr = "ice_accretion_%ihr" % (hours,)
+    assert abs(getattr(report, myattr).value("IN") - 0.03) < 0.001
     assert str(report).find("Ice Accretion") > 0
 
 
@@ -80,8 +97,7 @@ def test_issue64_cloudkeyerror():
 def test_issue67_precip_text():
     """Check that precip_text is properly defined in present_weather."""
     report = Metar.Metar(
-        "METAR FSIA 220100Z AUTO 14014KT 120V180 9999 ///////// "
-        "27/23 Q1010"
+        "METAR FSIA 220100Z AUTO 14014KT 120V180 9999 ///////// " "27/23 Q1010"
     )
     res = report.present_weather()
     assert res == "/////////"
@@ -94,10 +110,29 @@ def test_issue40_runwayunits():
         "18/16 A2992 RMK SLP045 T01820159"
     )
     res = report.runway_visual_range()
-    assert res == 'on runway 28L, 2600 feet'
-    res = report.runway_visual_range('M')
-    assert res == 'on runway 28L, 792 meters'
+    assert res == "on runway 28L, 2600 feet"
+    res = report.runway_visual_range("M")
+    assert res == "on runway 28L, 792 meters"
 
+def test_issue107_runwayunits():
+    """Check reported units on runway visual range defaulting to meters."""
+    report = Metar.Metar(
+        "METAR KPIT 091955Z COR 22015G25KT 3/4SM R28L/1500 TSRA OVC010CB "
+        "18/16 A2992 RMK SLP045 T01820159"
+    )
+    res = report.runway_visual_range()
+    assert res == "on runway 28L, 1500 meters"
+    res = report.runway_visual_range("FT")
+    assert res == "on runway 28L, 4921 feet"
+
+@pytest.mark.parametrize("RVR", ["R28L/////", "R28L/////FT", "R28L//////", "R28L/////N"])
+def test_issue26_runway_slashes(RVR):
+    """Check RVR with slashes decoding."""
+    report = Metar.Metar(
+        "METAR KPIT 091955Z COR 22015G25KT 3/4SM R28L/2600FT {} TSRA OVC010CB "
+        "18/16 A2992 RMK SLP045 T1820160".format(RVR)
+    )
+    assert len(report.runway) == 1
 
 def test_010_parseType_default():
     """Check default value of the report type."""
@@ -227,7 +262,7 @@ def test_042_parseModifier_nonstd():
 
     def report(mod_group):
         """(Macro) Return Metar object from parsing the modifier group."""
-        return Metar.Metar(sta_time+mod_group)
+        return Metar.Metar(sta_time + mod_group)
 
     assert report("RTD").mod == "RTD"
     assert report("TEST").mod == "TEST"
@@ -273,7 +308,7 @@ def test_140_parseWind():
     assert report.decode_completed
     assert report.wind_speed.value() == 10
     assert report.wind() == "E at 5 knots"
-    assert report.wind('KMH') == "E at 10 km/h"
+    assert report.wind("KMH") == "E at 10 km/h"
 
     report = Metar.Metar(sta_time + "090010KT")
     assert report.decode_completed
@@ -381,13 +416,13 @@ def test_150_parseVisibility():
 
     def report(vis_group):
         """(Macro) Return Metar object for a report with the vis group."""
-        return Metar.Metar(sta_time + "09010KT "+vis_group)
+        return Metar.Metar(sta_time + "09010KT " + vis_group)
 
     def report_nowind(vis_group):
         """(Macro) Return Metar object for a report containing the given
         visibility group, without a preceeding wind group.
         """
-        return Metar.Metar(sta_time+vis_group)
+        return Metar.Metar(sta_time + vis_group)
 
     assert report("10SM").vis.value() == 10
     assert report("10SM").vis_dir is None
@@ -458,7 +493,7 @@ def test_151_parseVisibility_direction():
 
     def report(vis_group):
         """(Macro) Return Metar object for a report given vis group."""
-        return Metar.Metar(sta_time + "09010KT "+vis_group)
+        return Metar.Metar(sta_time + "09010KT " + vis_group)
 
     assert report("5000N").vis_dir.compass() == "N"
     assert report("5000N").vis_dir.value() == 0
@@ -483,7 +518,7 @@ def test_152_parseVisibility_with_following_temperature():
 
     def report(vis_group):
         """(Macro) Return Metar object for a report given visibility group."""
-        return Metar.Metar(sta_time + "09010KT "+vis_group)
+        return Metar.Metar(sta_time + "09010KT " + vis_group)
 
     assert report("CAVOK 02/01").vis.value() == 10000
     assert report("CAVOK 02/01").vis_dir is None
@@ -504,16 +539,15 @@ def test_290_ranway_state():
     def report(runway_state):
         """(Macro) Return Metar object for  given runway state group"""
         sample_metar = (
-            'EGNX 191250Z VRB03KT 9999 -RASN FEW008 SCT024 '
-            'BKN046 M01/M03 Q0989 '
+            "EGNX 191250Z VRB03KT 9999 -RASN FEW008 SCT024 " "BKN046 M01/M03 Q0989 "
         )
-        return Metar.Metar(sample_metar + ' ' + runway_state)
+        return Metar.Metar(sample_metar + " " + runway_state)
 
-    assert report('09690692 27550591').temp.value() == -1.0
-    assert report('09690692 27550591').remarks() == ""
+    assert report("09690692 27550591").temp.value() == -1.0
+    assert report("09690692 27550591").remarks() == ""
 
-    assert report('09SNOCLO').remarks() == ""
-    assert report('09CLRD//').remarks() == ""
+    assert report("09SNOCLO").remarks() == ""
+    assert report("09CLRD//").remarks() == ""
 
 
 def test_300_parseTrend():
@@ -525,29 +559,31 @@ def test_300_parseTrend():
         forecast and remarks.
         """
         sample_metar = sta_time + "09010KT 10SM -SN OVC020 23/05 Q1001"
-        return Metar.Metar(sample_metar+' '+trend_group+' '+remarks)
+        return Metar.Metar(sample_metar + " " + trend_group + " " + remarks)
 
-    assert report('TEMPO FM0306 BKN030CU').trend() == 'TEMPO FM0306 BKN030CU'
-    assert report('TEMPO FM0306 BKN030CU').temp.value() == 23.0
-    assert report('TEMPO FM0306 BKN030CU').remarks() == ""
+    assert report("TEMPO FM0306 BKN030CU").trend() == "TEMPO FM0306 BKN030CU"
+    assert report("TEMPO FM0306 BKN030CU").temp.value() == 23.0
+    assert report("TEMPO FM0306 BKN030CU").remarks() == ""
 
-    assert report('BECMG 0306 VRB06KT').trend() == 'BECMG 0306 VRB06KT'
-    assert report('FCST AT0327 +FC').trend() == 'FCST AT0327 +FC'
+    assert report("BECMG 0306 VRB06KT").trend() == "BECMG 0306 VRB06KT"
+    assert report("FCST AT0327 +FC").trend() == "FCST AT0327 +FC"
 
-    assert report('TEMPO 0306 1/2SM').trend() == 'TEMPO 0306 1/2SM'
-    ans = 'TEMPO FM0306 TL0345 01030G50KT'
+    assert report("TEMPO 0306 1/2SM").trend() == "TEMPO 0306 1/2SM"
+    ans = "TEMPO FM0306 TL0345 01030G50KT"
     assert report(ans).trend() == ans
 
-    assert report('TEMPO 0306 RMK 402500072').trend() == 'TEMPO 0306'
-    assert report('TEMPO 0306 RMK 402500072').max_temp_24hr.value() == 25.0
+    assert report("TEMPO 0306 RMK 402500072").trend() == "TEMPO 0306"
+    assert report("TEMPO 0306 RMK 402500072").max_temp_24hr.value() == 25.0
 
 
 def test_snowdepth():
     """Check parsing of 4/ group snowdepth"""
-    sample_metar = ("KDOV 040558Z 23004KT 1 1/2SM R01/2800FT -SN BR "
-                    "OVC006 M01/M01 A3015 RMK AO2A SLP213 P0000 4/001 "
-                    "60010 T10071007 10017 "
-                    "21009 55016 VISNO RWY19 CHINO RWY19 $")
+    sample_metar = (
+        "KDOV 040558Z 23004KT 1 1/2SM R01/2800FT -SN BR "
+        "OVC006 M01/M01 A3015 RMK AO2A SLP213 P0000 4/001 "
+        "60010 T10071007 10017 "
+        "21009 55016 VISNO RWY19 CHINO RWY19 $"
+    )
     m = Metar.Metar(sample_metar)
     assert m.snowdepth.value() == 1
 
@@ -562,22 +598,22 @@ def test_310_parse_sky_conditions():
         )
         return Metar.Metar(sample_metar)
 
-    assert report('SCT030').sky_conditions() == 'scattered clouds at 3000 feet'
-    assert report('BKN001').sky_conditions() == 'broken clouds at 100 feet'
-    assert report('OVC008').sky_conditions() == 'overcast at 800 feet'
-    ans = 'overcast cumulonimbus at 1000 feet'
-    assert report('OVC010CB').sky_conditions() == ans
-    ans = 'scattered towering cumulus at 2000 feet'
-    assert report('SCT020TCU').sky_conditions() == ans
-    ans = 'broken cumulonimbus at 1500 feet'
-    assert report('BKN015CB').sky_conditions() == ans
-    ans = 'a few clouds at 3000 feet'
-    assert report('FEW030').sky_conditions() == ans
-    ans = 'indefinite ceiling, vertical visibility to 100 feet'
-    assert report('VV001').sky_conditions() == ans
-    assert report('SKC').sky_conditions() == 'clear'
-    assert report('CLR').sky_conditions() == 'clear'
-    assert report('NSC').sky_conditions() == 'clear'
+    assert report("SCT030").sky_conditions() == "scattered clouds at 3000 feet"
+    assert report("BKN001").sky_conditions() == "broken clouds at 100 feet"
+    assert report("OVC008").sky_conditions() == "overcast at 800 feet"
+    ans = "overcast cumulonimbus at 1000 feet"
+    assert report("OVC010CB").sky_conditions() == ans
+    ans = "scattered towering cumulus at 2000 feet"
+    assert report("SCT020TCU").sky_conditions() == ans
+    ans = "broken cumulonimbus at 1500 feet"
+    assert report("BKN015CB").sky_conditions() == ans
+    ans = "a few clouds at 3000 feet"
+    assert report("FEW030").sky_conditions() == ans
+    ans = "indefinite ceiling, vertical visibility to 100 feet"
+    assert report("VV001").sky_conditions() == ans
+    assert report("SKC").sky_conditions() == "clear"
+    assert report("CLR").sky_conditions() == "clear"
+    assert report("NSC").sky_conditions() == "clear"
 
 
 def test_not_strict_mode():
@@ -585,7 +621,7 @@ def test_not_strict_mode():
     # This example metar has an extraneous 'M' in it, but the rest is fine
     # Let's make sure that we can activate a non-strict mode, and flag that
     # there are unparsed portions
-    code = 'K9L2 100958Z AUTO 33006KT 10SM CLR M A3007 RMK AO2 SLPNO FZRANO $'
+    code = "K9L2 100958Z AUTO 33006KT 10SM CLR M A3007 RMK AO2 SLPNO FZRANO $"
     raisesParserError(code)
 
     with warnings.catch_warnings(record=True) as w:
@@ -594,8 +630,19 @@ def test_not_strict_mode():
 
     assert not report.decode_completed
     assert report.cycle == 10
-    assert report.mod == 'AUTO'
+    assert report.mod == "AUTO"
     assert not report.recent
-    assert report.station_id == 'K9L2'
+    assert report.station_id == "K9L2"
     assert report.vis.value() == 10
-    assert report.sky_conditions() == 'clear'
+    assert report.sky_conditions() == "clear"
+
+
+def test_cor_auto_mod():
+    """Test parsing of a COR AUTO Metar."""
+    code = (
+        "METAR KADW 252356Z COR AUTO 10008KT 10SM CLR 19/11 A2986 "
+        "RMK AO2 SLP117 T01880111 10230 20188 50004 $ COR 0007="
+    )
+    m = Metar.Metar(code, year=2019)
+
+    assert m.mod == 'COR AUTO'

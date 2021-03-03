@@ -10,57 +10,59 @@
 #  Here's a summary, adapted from the comments in the Metar.Metar.__init__()
 #  method:
 #
-#    Attribute       Comments [data type]
-#    --------------  --------------------
-#    code             original METAR code [string]
-#    type             METAR (routine) or SPECI (special) [string]
-#    mod              AUTO (automatic) or COR (corrected) [string]
-#    station_id       4-character ICAO station code [string]
-#    time             observation time [datetime]
-#    cycle            observation cycle (0-23) [int]
-#    wind_dir         wind direction [direction]
-#    wind_speed       wind speed [speed]
-#    wind_gust        wind gust speed [speed]
-#    wind_dir_from    beginning of range for win dir [direction]
-#    wind_dir_to      end of range for wind dir [direction]
-#    vis              visibility [distance]
-#    vis_dir          visibility direction [direction]
-#    max_vis          visibility [distance]
-#    max_vis_dir      visibility direction [direction]
-#    temp             temperature (C) [temperature]
-#    dewpt            dew point (C) [temperature]
-#    press            barometric pressure [pressure]
-#    runway           runway visibility [list of tuples...]
-#                        name [string]
-#                        low  [distance]
-#                        high [distance]
-#    weather          present weather [list of tuples...]
-#                        intensity     [string]
-#                        description   [string]
-#                        precipitation [string]
-#                        obscuration   [string]
-#                        other         [string]
-#    recent           recent weather [list of tuples...]
-#    sky              sky conditions [list of tuples...]
-#                        cover   [string]
-#                        height  [distance]
-#                        cloud   [string]
-#    windshear        runways w/ wind shear [list of strings]
+#    Attribute          Comments [data type]
+#    ----------------   ------------------------------------------
+#    code               original METAR code [string]
+#    type               METAR (routine) or SPECI (special) [string]
+#    mod                AUTO (automatic) or COR (corrected) [string]
+#    station_id         4-character ICAO station code [string]
+#    time               observation time [datetime]
+#    cycle              observation cycle (0-23) [int]
+#    wind_dir           wind direction [direction]
+#    wind_speed         wind speed [speed]
+#    wind_gust          wind gust speed [speed]
+#    wind_dir_from      beginning of range for win dir [direction]
+#    wind_dir_to        end of range for wind dir [direction]
+#    vis                visibility [distance]
+#    vis_dir            visibility direction [direction]
+#    max_vis            visibility [distance]
+#    max_vis_dir        visibility direction [direction]
+#    temp               temperature (C) [temperature]
+#    dewpt              dew point (C) [temperature]
+#    press              barometric pressure [pressure]
+#    runway             runway visibility [list of tuples...]
+#                          name [string]
+#                          low  [distance]
+#                          high [distance]
+#    weather            present weather [list of tuples...]
+#                          intensity     [string]
+#                          description   [string]
+#                          precipitation [string]
+#                          obscuration   [string]
+#                          other         [string]
+#    recent             recent weather [list of tuples...]
+#    sky                sky conditions [list of tuples...]
+#                          cover   [string]
+#                          height  [distance]
+#                          cloud   [string]
+#    windshear          runways w/ wind shear [list of strings]
 #
-#    press_sea_level  sea-level pressure [pressure]
-#    wind_speed_peak  peak wind speed in last hour [speed]
-#    wind_dir_peak    direction of peak wind speed in last hour [direction]
-#    max_temp_6hr     max temp in last 6 hours [temperature]
-#    min_temp_6hr     min temp in last 6 hours [temperature]
-#    max_temp_24hr    max temp in last 24 hours [temperature]
-#    min_temp_24hr    min temp in last 24 hours [temperature]
-#    precip_1hr       precipitation over the last hour [precipitation]
-#    precip_3hr       precipitation over the last 3 hours [precipitation]
-#    precip_6hr       precipitation over the last 6 hours [precipitation]
-#    precip_24hr      precipitation over the last 24 hours [precipitation]
+#    press_sea_level    sea-level pressure [pressure]
+#    wind_speed_peak    peak wind speed in last hour [speed]
+#    wind_dir_peak      direction of peak wind speed in last hour [direction]
+#    max_temp_6hr       max temp in last 6 hours [temperature]
+#    min_temp_6hr       min temp in last 6 hours [temperature]
+#    max_temp_24hr      max temp in last 24 hours [temperature]
+#    min_temp_24hr      min temp in last 24 hours [temperature]
+#    precip_1hr         precipitation over the last hour [precipitation]
+#    precip_3hr         precipitation over the last 3 hours [precipitation]
+#    precip_6hr         precipitation over the last 6 hours [precipitation]
+#    precip_24hr        precipitation over the last 24 hours [precipitation]
 #
-#    _remarks         remarks [list of strings]
-#    _unparsed        unparsed remarks [list of strings]
+#    _remarks           remarks [list of strings]
+#    _unparsed_groups   unparsed groups [list of strings]
+#    _unparsed_remarks  unparsed remarks [list of strings]
+
 #
 #  The metar.Datatypes classes (temperature, pressure, precipitation,
 #  speed, direction) describe an observation and its units.  They provide
@@ -82,10 +84,15 @@ from __future__ import print_function
 from metar import Metar
 
 # A sample METAR report
-code = "METAR KEWR 111851Z VRB03G19KT 2SM R04R/3000VP6000FT TSRA BR FEW015 BKN040CB BKN065 OVC200 22/22 A2987 RMK AO2 PK WND 29028/1817 WSHFT 1812 TSB05RAB22 SLP114 FRQ LTGICCCCG TS OHD AND NW-N-E MOV NE P0013 T02270215"
+code = (
+    "METAR KEWR 111851Z VRB03G19KT 2SM R04R/3000VP6000FT TSRA BR FEW015 "
+    "BKN040CB BKN065 OVC200 22/22 A2987 RMK AO2 PK WND 29028/1817 WSHFT "
+    "1812 TSB05RAB22 SLP114 FRQ LTGICCCCG TS OHD AND NW-N-E MOV NE P0013 "
+    "T02270215"
+)
 
 print("-----------------------------------------------------------------------")
-print("METAR: ",code)
+print("METAR: ", code)
 print("-----------------------------------------------------------------------")
 
 # Initialize a Metar object with the coded report
@@ -149,6 +156,6 @@ print("sky: %s" % obs.sky_conditions("\n     "))
 # attributes and won't be listed here.
 if obs._remarks:
     print("remarks:")
-    print("- "+obs.remarks("\n- "))
+    print("- " + obs.remarks("\n- "))
 
 print("-----------------------------------------------------------------------\n")

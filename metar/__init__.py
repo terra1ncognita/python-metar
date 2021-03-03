@@ -5,7 +5,7 @@
 
 US conventions for METAR/SPECI reports are described in chapter 12 of
 the Federal Meteorological Handbook No.1. (FMH-1 1995), issued by NOAA.
-See <http://metar.noaa.gov/>
+See http://www.ofcm.gov/publications/fmh/FMH1/FMH1.pdf
 
 International conventions for the METAR and SPECI codes are specified in
 the WMO Manual on Codes, vol I.1, Part A (WMO-306 I.i.A).
@@ -28,15 +28,20 @@ __author__ = "Tom Pollard"
 
 __email__ = "pollard@alum.mit.edu"
 
-__version__ = "1.7.0"
+__version__ = "1.8.0"
 
 __doc__ = """metar v%s (c) 2009, %s
 
 Metar is a python package that interprets coded METAR and SPECI weather reports.
 
-Please e-mail bug reports to: %s""" % (__version__, __author__, __email__)
+Please e-mail bug reports to: %s""" % (
+    __version__,
+    __author__,
+    __email__,
+)
 
-__LICENSE__ = """
+__LICENSE__ = (
+    """
 Copyright (c) 2009, %s
 All rights reserved.
 
@@ -57,4 +62,6 @@ INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
 CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
-""" % __author__
+"""
+    % __author__
+)
